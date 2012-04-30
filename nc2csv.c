@@ -19,6 +19,7 @@ void HandleNCError(char* funcName, int status)
 	exit(status);
 }
 
+//storage for individual NetCDF variable raw data
 typedef struct
 {
 	nc_type type;
@@ -37,6 +38,17 @@ int main (int argc, char** argv)
 	}
 	
 	char* filename = argv[1];
+	size_t filenameLength = strlen(filename);
+	
+	//allocate space for the CSV filename, plus some room for the longer extension, etc
+	char *csvFilename = malloc((filenameLength + 5)*sizeof(char));
+	strcpy(csvFilename, filename);
+	char *periodLocation = strrchr(csvFilename, '.');
+	*periodLocation = '\0';
+	strcat(csvFilename, ".csv");
+	
+	printf("output filename: %s\n", csvFilename);
+	
 	
 	//open the NetCDF file/dataset
 	int datasetID;
@@ -100,7 +112,7 @@ int main (int argc, char** argv)
 	
 	//open/create the CSV file for outputting data
 	//todo: better file name
-	FILE *csvFile = fopen("output.csv", "w");
+	FILE *csvFile = fopen(csvFilename, "w");
 	
 	//output the global attributes
 	//todo: output more than just the text-based ones
@@ -115,10 +127,12 @@ int main (int argc, char** argv)
 		
 		char *attValue = malloc(attLength*sizeof(char));
 		
+		//only output the attribute if it can be converted into text
 		ncResult = nc_get_att_text(datasetID, NC_GLOBAL, attName, attValue);
-		if (ncResult != NC_NOERR) HandleNCError("nc_get_att_text", ncResult);
-		
-		fprintf(csvFile, "%s, %s\r\n", attName, attValue);
+		if (ncResult == NC_NOERR)
+		{
+			fprintf(csvFile, "%s, %s\r\n", attName, attValue);
+		}
 		
 		free(attValue);
 	}
@@ -389,6 +403,7 @@ int main (int argc, char** argv)
 		free(variableDataList[i]->data);
 	}
 	free(variableDataList);
+	free(csvFilename);
 	
 	//close the CSV file
 	fclose(csvFile);
