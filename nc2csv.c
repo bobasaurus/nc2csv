@@ -102,13 +102,34 @@ int main (int argc, char** argv)
 	//todo: better file name
 	FILE *csvFile = fopen("output.csv", "w");
 	
+	//output the global attributes
+	//todo: output more than just the text-based ones
+	for (i=0; i<numGlobalAtts; i++)
+	{
+		char attName[NC_MAX_NAME+1];
+		ncResult = nc_inq_attname(datasetID, NC_GLOBAL, i, attName);
+		if (ncResult != NC_NOERR) HandleNCError("nc_inq_attname", ncResult);
+		size_t attLength;
+		ncResult = nc_inq_attlen(datasetID, NC_GLOBAL, attName, &attLength);
+		if (ncResult != NC_NOERR) HandleNCError("nc_inq_attlen", ncResult);
+		
+		char *attValue = malloc(attLength*sizeof(char));
+		
+		ncResult = nc_get_att_text(datasetID, NC_GLOBAL, attName, attValue);
+		if (ncResult != NC_NOERR) HandleNCError("nc_get_att_text", ncResult);
+		
+		fprintf(csvFile, "%s, %s\r\n", attName, attValue);
+		
+		free(attValue);
+	}
+	fprintf(csvFile, "\r\n");
+	
 	//storage for all variables in the NetCDF file
 	//todo: watch out for segfaults, maybe use nc_get_vara_ to get pieces instead of whole variables
 	VariableData **variableDataList = (VariableData **)malloc(numVars * sizeof(VariableData*));
 	char **standardNameList = (char **)malloc(numVars * sizeof(char*));
 	char **longNameList = (char **)malloc(numVars * sizeof(char*));
 	char **unitStringList = (char **)malloc(numVars * sizeof(char*));
-	
 	
 	//loop through all the variables
 	int varID;
