@@ -1,6 +1,8 @@
 //nc2csv.c
 //Copyright 2012, Allen Jordan, allen.jordan@gmail.com
 
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 //#include <sys/types.h>
 #include <dirent.h>
@@ -102,13 +104,10 @@ int main (int argc, char** argv)
 	//storage for all variables in the NetCDF file
 	//todo: watch out for segfaults, maybe use nc_get_vara_ to get pieces instead of whole variables
 	VariableData **variableDataList = (VariableData **)malloc(numVars * sizeof(VariableData*));
-	char ** standardNameList = (char **)malloc(numVars * sizeof(char*));
+	char **standardNameList = (char **)malloc(numVars * sizeof(char*));
 	char **longNameList = (char **)malloc(numVars * sizeof(char*));
 	char **unitStringList = (char **)malloc(numVars * sizeof(char*));
 	
-	//an empty string allocated on the heap for common use when attributes are missing, etc
-	char *emptyHeapStr = malloc(1*sizeof(char));
-	emptyHeapStr[0] = '\0';
 	
 	//loop through all the variables
 	int varID;
@@ -145,7 +144,6 @@ int main (int argc, char** argv)
 		}
 		else
 		{
-			//todo: this is kind of silly
 			char *emptyHeapStr = malloc(1*sizeof(char));
 			emptyHeapStr[0] = '\0';
 			standardNameList[varID] = emptyHeapStr;
@@ -166,7 +164,6 @@ int main (int argc, char** argv)
 		}
 		else
 		{
-			//todo: this is kind of silly
 			char *emptyHeapStr = malloc(1*sizeof(char));
 			emptyHeapStr[0] = '\0';
 			longNameList[varID] = emptyHeapStr;
@@ -187,7 +184,6 @@ int main (int argc, char** argv)
 		}
 		else
 		{
-			//todo: this is kind of silly
 			char *emptyHeapStr = malloc(1*sizeof(char));
 			emptyHeapStr[0] = '\0';
 			unitStringList[varID] = emptyHeapStr;
@@ -342,8 +338,22 @@ int main (int argc, char** argv)
 		fprintf(csvFile, "\r\n");
 	}
 	
-	//free up some memory
-	//todo: free up the name/unit storage arrays too
+	//free up heap memory
+	for (i=0; i<numVars; i++)
+	{
+		free(standardNameList[i]);
+	}
+	free(standardNameList);
+	for (i=0; i<numVars; i++)
+	{
+		free(longNameList[i]);
+	}
+	free(longNameList);
+	for (i=0; i<numVars; i++)
+	{
+		free(unitStringList[i]);
+	}
+	free(unitStringList);
 	for (i=0; i<numVars; i++)
 	{
 		free(variableDataList[i]->data);
