@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 //#include <sys/types.h>
-#include <dirent.h>
+//#include <dirent.h>
 #include <netcdf.h>
 
 //string buffer for print formating
@@ -16,6 +16,7 @@
 void HandleNCError(char* funcName, int status)
 {
 	printf("NetCDF error in: %s with status: %d\n", funcName, status);
+	exit(status);
 }
 
 typedef struct
@@ -203,32 +204,44 @@ int main (int argc, char** argv)
 			{
 				case NC_BYTE:
 				{
-					variableData->data = malloc(dimLength * sizeof(char));
+					variableData->data = malloc(dimLength * sizeof(unsigned char));
+					ncResult = nc_get_var_uchar(datasetID, varID, (unsigned char*)variableData->data);
+					if (ncResult != NC_NOERR) HandleNCError("nc_get_var", ncResult);
 					break;
 				}
 				case NC_CHAR:
 				{
 					variableData->data = malloc(dimLength * sizeof(char));
+					ncResult = nc_get_var_text(datasetID, varID, (char*)variableData->data);
+					if (ncResult != NC_NOERR) HandleNCError("nc_get_var", ncResult);
 					break;
 				}
 				case NC_SHORT:
 				{
 					variableData->data = malloc(dimLength * sizeof(short));
+					ncResult = nc_get_var_short(datasetID, varID, (short*)variableData->data);
+					if (ncResult != NC_NOERR) HandleNCError("nc_get_var", ncResult);
 					break;
 				}
 				case NC_INT:
 				{
 					variableData->data = malloc(dimLength * sizeof(int));
+					ncResult = nc_get_var_int(datasetID, varID, (int*)variableData->data);
+					if (ncResult != NC_NOERR) HandleNCError("nc_get_var", ncResult);
 					break;
 				}
 				case NC_FLOAT:
 				{
 					variableData->data = malloc(dimLength * sizeof(float));
+					ncResult = nc_get_var_float(datasetID, varID, (float*)variableData->data);
+					if (ncResult != NC_NOERR) HandleNCError("nc_get_var", ncResult);
 					break;
 				}
 				case NC_DOUBLE:
 				{
 					variableData->data = malloc(dimLength * sizeof(double));
+					ncResult = nc_get_var_double(datasetID, varID, (double*)variableData->data);
+					if (ncResult != NC_NOERR) HandleNCError("nc_get_var", ncResult);
 					break;
 				}
 				default:
@@ -237,10 +250,6 @@ int main (int argc, char** argv)
 					break;
 				}
 			}//end of type switch
-			
-			//get the variable's raw data
-			ncResult = nc_get_var(datasetID, varID, variableData->data);
-			if (ncResult != NC_NOERR) HandleNCError("nc_get_var", ncResult);
 			
 			//store the variable data structure in the list of all variable data structures, to be used later when outputting
 			variableDataList[varID] = variableData;
