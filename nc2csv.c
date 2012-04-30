@@ -7,16 +7,13 @@
 #include <netcdf.h>
 
 //string buffer for print formating
-#define STR_LENGTH	100
-char str[STR_LENGTH];
+//#define STR_LENGTH	100
+//char str[STR_LENGTH];
 
 //todo: make the program exit somehow
 void HandleNCError(char* funcName, int status)
 {
-	fputs("NetCDF error in ", stdout);
-	fputs(funcName, stdout);
-	snprintf(str, STR_LENGTH, " with status: %d", status);
-	puts(str);
+	printf("NetCDF error in: %s with status: %d\n", funcName, status);
 }
 
 typedef struct
@@ -64,8 +61,7 @@ int main (int argc, char** argv)
 	}
 	
 	//show some of the NetCDF file information on the console
-	snprintf(str, STR_LENGTH, "# dims: %d\n# vars: %d\n# global atts: %d", numDims, numVars, numGlobalAtts);
-	puts(str);
+	printf("# dims: %d\n# vars: %d\n# global atts: %d\n", numDims, numVars, numGlobalAtts);
 	if (unlimitedDimID != -1) puts("contains unlimited dimension");
 	switch (formatVersion)
 	{
@@ -96,8 +92,7 @@ int main (int argc, char** argv)
 	ncResult = nc_inq_dim(datasetID, 0, dimName, &dimLength);
 	if (ncResult != NC_NOERR) HandleNCError("nc_inq_dim", ncResult);
 	
-	snprintf(str, STR_LENGTH, "dimension: %s length: %d", dimName, dimLength);
-	puts(str);
+	printf("dimension: %s length: %d\n", dimName, dimLength);
 	//}
 	
 	//open/create the CSV file for outputting data
@@ -129,8 +124,7 @@ int main (int argc, char** argv)
 		if (ncResult != NC_NOERR) HandleNCError("nc_inq_var", ncResult);
 		
 		//output variable info to console
-		snprintf(str, STR_LENGTH, "variable: %s # dims: %d # atts: %d type: %d", varName, numVarDims, numVarAtts, (int)varType);
-		puts(str);
+		printf("variable: %s # dims: %d # atts: %d type: %d\n", varName, numVarDims, numVarAtts, (int)varType);
 		
 		//output variable name to the CSV file
 		fprintf(csvFile, "%s", varName);
@@ -294,12 +288,13 @@ int main (int argc, char** argv)
 	fprintf(csvFile, "\r\n");
 	
 	
-	//output to the CSV file
+	//output variable data to the CSV file
 	for (i=0; i<dimLength; i++)
 	{
 		for (j=0; j<numVars; j++)
 		{
 			VariableData *variableData = variableDataList[j];
+			//write data in the correct format for the variable's type
 			switch (variableData->type)
 			{
 				case NC_BYTE:
@@ -347,6 +342,8 @@ int main (int argc, char** argv)
 		fprintf(csvFile, "\r\n");
 	}
 	
+	//free up some memory
+	//todo: free up the name/unit storage arrays too
 	for (i=0; i<numVars; i++)
 	{
 		free(variableDataList[i]->data);

@@ -1,1 +1,1 @@
-gcc nc2csv.c -lm -lnetcdf -static
+gcc nc2csv.c -lm -lnetcdf
