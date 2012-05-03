@@ -11,7 +11,7 @@
 
 //a macro for copying a substring
 //#define substr(dest, src, start, length) (strlcpy(dest, src+start, length+1))
-#define substr(dest, src, start, length) (snprintf(dest, length, "%s", src))
+#define substr(dest, src, start, length) (snprintf(dest, length+1, "%s", src+start))
 
 //todo: make the program exit somehow
 void HandleNCError(char* funcName, int status)
