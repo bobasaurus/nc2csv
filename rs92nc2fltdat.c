@@ -7,10 +7,11 @@
 #include <time.h>
 #include <netcdf.h>
 
-#define VERSION		1.000
+#define VERSION		1.001
 
 //a macro for copying a substring
-#define substr(dest, src, start, length) (strlcpy(dest, src+start, length+1))
+//#define substr(dest, src, start, length) (strlcpy(dest, src+start, length+1))
+#define substr(dest, src, start, length) (snprintf(dest, length, "%s", src))
 
 //todo: make the program exit somehow
 void HandleNCError(char* funcName, int status)
